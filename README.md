@@ -1,6 +1,5 @@
 # School DevOps Project — Two FastAPI Microservices
 
-A small but complete DevOps / microservices project for the school assignment.
 It is made of **two independent FastAPI services** that communicate **over HTTP**,
 a **vanilla-JS dashboard**, a **docker-compose** stack, a **GitHub Actions CI**
 pipeline, and a unit-test suite (each architectural layer tested separately,
@@ -69,8 +68,7 @@ it to `http://courses:8002`. Locally it defaults to `http://localhost:8002`.
 ### Mocking the web in tests (`respx`)
 
 The outbound A → B HTTP calls are stubbed with **`respx`** so the Students
-service can be tested in isolation, without Service B running. This is the
-graded *"the service mocks the web"* requirement and is demonstrated at two
+service can be tested in isolation, without Service B running. *"the service mocks the web"* requirement is demonstrated at two
 layers:
 
 - **Service layer**: `service_students/tests/test_student_service.py`
