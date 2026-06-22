@@ -199,6 +199,9 @@ tbody tr:hover { background: var(--surface-2); }
   backdrop-filter: blur(6px); display: grid; place-items: center; z-index: 50;
   animation: fade .2s ease;
 }
+/* The `hidden` attribute toggled from JS must win over `display: grid` above,
+   otherwise the modal renders on load and can never be dismissed. */
+.modal-backdrop[hidden] { display: none; }
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 .modal {
   width: min(560px, 92vw); background: var(--bg-2);
