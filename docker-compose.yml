@@ -1,0 +1,43 @@
+services:
+  courses:
+    build: ./service_courses
+    container_name: school-courses
+    ports:
+      - "8002:8002"
+    environment:
+      DATABASE_URL: "sqlite:////data/courses.db"
+    volumes:
+      - courses-data:/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0) if urllib.request.urlopen('http://localhost:8002/health').status==200 else sys.exit(1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  students:
+    build: ./service_students
+    container_name: school-students
+    ports:
+      - "8001:8001"
+    environment:
+      # Service A talks to Service B over the docker network by service name.
+      COURSES_SERVICE_URL: "http://courses:8002"
+      DATABASE_URL: "sqlite:////data/students.db"
+    volumes:
+      - students-data:/data
+    depends_on:
+      courses:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    container_name: school-frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - students
+      - courses
+
+volumes:
+  students-data:
+  courses-data:

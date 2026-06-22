@@ -1,0 +1,1 @@
+"""Courses microservice (Service B)."""
