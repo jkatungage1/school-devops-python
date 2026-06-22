@@ -1,8 +1,18 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "school-devops-python"
 version = "1.0.0"
 description = "Two FastAPI microservices (Students + Courses) wired by docker-compose, with a vanilla-JS dashboard."
 requires-python = ">=3.12"
+
+# The repo root is not an importable package — the apps live in
+# service_*/app. `pip install -e ".[dev]"` only exists to pull the dev
+# tooling below, so tell setuptools there is nothing to package.
+[tool.setuptools]
+py-modules = []
 
 # Dev / test dependencies (installed in CI and locally for tooling).
 [project.optional-dependencies]
