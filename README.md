@@ -1,5 +1,14 @@
 # School DevOps Project — Two FastAPI Microservices
 
+[![CI](https://github.com/jkatungage1/school-devops-python/actions/workflows/ci.yml/badge.svg)](https://github.com/jkatungage1/school-devops-python/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/jkatungage1/school-devops-python/branch/main/graph/badge.svg)](https://codecov.io/gh/jkatungage1/school-devops-python)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=jkatungage1_school-devops-python&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=jkatungage1_school-devops-python)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=jkatungage1_school-devops-python&metric=coverage)](https://sonarcloud.io/summary/new_code?id=jkatungage1_school-devops-python)
+
+> Badges assume the repo is pushed to `github.com/jkatungage1/school-devops-python`.
+> If you name it differently, update the org/repo and the Sonar `project=` key here,
+> in `sonar-project.properties`, and in the SonarCloud project itself.
+
 It is made of **two independent FastAPI services** that communicate **over HTTP**,
 a **vanilla-JS dashboard**, a **docker-compose** stack, a **GitHub Actions CI**
 pipeline, and a unit-test suite (each architectural layer tested separately,
