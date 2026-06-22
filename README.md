@@ -5,10 +5,6 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=jkatungage1_school-devops-python&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=jkatungage1_school-devops-python)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=jkatungage1_school-devops-python&metric=coverage)](https://sonarcloud.io/summary/new_code?id=jkatungage1_school-devops-python)
 
-> Badges assume the repo is pushed to `github.com/jkatungage1/school-devops-python`.
-> If you name it differently, update the org/repo and the Sonar `project=` key here,
-> in `sonar-project.properties`, and in the SonarCloud project itself.
-
 It is made of **two independent FastAPI services** that communicate **over HTTP**,
 a **vanilla-JS dashboard**, a **docker-compose** stack, a **GitHub Actions CI**
 pipeline, and a unit-test suite (each architectural layer tested separately,
@@ -210,13 +206,12 @@ ruff → mypy (non-blocking) → pytest `--cov` for each service → upload cove
 
 ## 7. Report screenshots
 
-Place screenshots for the written report under `docs/screenshots/`
-(create the folder). Suggested shots:
+Screenshots for the written report live in `docs/screenshots/`:
 
 - `dashboard.png` — the running dashboard at http://localhost:8080
 - `swagger-students.png` — http://localhost:8001/docs
 - `swagger-courses.png` — http://localhost:8002/docs
-- `tests.png` — output of `make cov` showing coverage > 80%
+- `tests.png` — `make cov` output showing coverage > 80%
 - `ci.png` — a green GitHub Actions run
 
 ---

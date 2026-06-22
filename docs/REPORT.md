@@ -1,7 +1,7 @@
 # DevOps Project Report — School-Service Microservices (Python)
 
 **Course:** DevOps · **Format:** binôme · **Language:** Python 3.12
-**Repository:** `school-devops-python` · **Generated:** 2026-06-22
+**Repository:** `school-devops-python` · **Date:** 2026-06-22
 
 ---
 
@@ -180,12 +180,3 @@ network. Bring the stack up with `docker compose up --build`.
 | Pas de Continuous Delivery | ✅ none added (out of scope) |
 | Bonus — Base de données | ✅ SQLite via SQLAlchemy |
 | Bonus — Front Web | ✅ vanilla-JS dashboard |
-
----
-
-## 10. Remaining / submission notes
-
-- **Push to GitHub** to trigger the CI run, then capture the green pipeline +
-  coverage artifact screenshots for the written report.
-- Add the **Google Cloud labs screenshots** required by the brief.
-- Submit on Moodle.
