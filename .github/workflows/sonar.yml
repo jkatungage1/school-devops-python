@@ -11,7 +11,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
           # Full history so SonarCloud can assign issues to the right commits.
           fetch-depth: 0
@@ -34,8 +34,7 @@ jobs:
           (cd service_students && pytest --cov=app --cov-report=xml)
           (cd service_courses  && pytest --cov=app --cov-report=xml)
 
-      - name: SonarCloud scan
-        uses: SonarSource/sonarqube-scan-action@v5
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@7006c4492b2e0ee0f816d36501671557c97f5995 # v8.1.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: https://sonarcloud.io
