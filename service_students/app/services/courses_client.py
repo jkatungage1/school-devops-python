@@ -20,6 +20,10 @@ class CoursesServiceUnavailableError(Exception):
     """Raised when Service B cannot be reached or returns a server error."""
 
 
+class GradeRejectedError(Exception):
+    """Raised when Service B rejects a grade (e.g. value out of range)."""
+
+
 class CoursesClient:
     """Thin synchronous wrapper around Service B's HTTP API."""
 
@@ -67,3 +71,33 @@ class CoursesClient:
             )
         response.raise_for_status()
         return float(response.json()["value"])
+
+    def record_grade(
+        self, student_id: int, course_code: str, value: float
+    ) -> dict:
+        """Persist a grade in Service B. Raises if B rejects it.
+
+        Makes ``POST {COURSES_SERVICE_URL}/grades``. Enrollment is *not* checked
+        here — that is Service A's responsibility before this call is made.
+        """
+        url = f"{self.base_url}/grades"
+        payload = {
+            "student_id": student_id,
+            "course_code": course_code,
+            "value": value,
+        }
+        try:
+            response = httpx.post(url, json=payload, timeout=self.timeout)
+        except httpx.HTTPError as exc:
+            raise CoursesServiceUnavailableError(str(exc)) from exc
+
+        if response.status_code == 404:
+            raise CourseNotFoundError(course_code)
+        if response.status_code >= 500:
+            raise CoursesServiceUnavailableError(
+                f"courses service returned {response.status_code}"
+            )
+        if response.status_code >= 400:
+            detail = response.json().get("detail", "grade rejected")
+            raise GradeRejectedError(detail)
+        return response.json()

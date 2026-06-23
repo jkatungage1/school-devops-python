@@ -268,10 +268,11 @@ $("#form-grade").addEventListener("submit", async (e) => {
   e.preventDefault();
   const f = new FormData(e.target);
   try {
-    await api(`${COURSES_API}/grades`, {
+    // Goes through Service A so the enrollment rule is enforced before the
+    // grade is persisted in Service B.
+    await api(`${STUDENTS_API}/students/${f.get("student_id")}/grades`, {
       method: "POST",
       body: JSON.stringify({
-        student_id: Number(f.get("student_id")),
         course_code: f.get("course_code"),
         value: Number(f.get("value")),
       }),

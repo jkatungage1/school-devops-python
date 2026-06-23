@@ -10,7 +10,10 @@ from sqlalchemy.orm import Session
 
 from app.data.models import Enrollment, Student
 from app.data.repository import StudentRepository
-from app.services.courses_client import CourseNotFoundError, CoursesClient
+from app.services.courses_client import (
+    CourseNotFoundError,
+    CoursesClient,
+)
 
 
 class StudentAlreadyExistsError(Exception):
@@ -27,6 +30,10 @@ class CourseValidationError(Exception):
 
 class AlreadyEnrolledError(Exception):
     """Raised when a student is already enrolled in the given course."""
+
+
+class NotEnrolledError(Exception):
+    """Raised when grading a student for a course they are not enrolled in."""
 
 
 class StudentService:
@@ -100,6 +107,24 @@ class StudentService:
             raise AlreadyEnrolledError(course_code)
 
         return self.repo.add_enrollment(db, student_id, course_code)
+
+    def record_grade(
+        self, db: Session, student_id: int, course_code: str, value: float
+    ) -> dict:
+        """Record a grade for a student, but only if they are enrolled.
+
+        Enrollment is owned by Service A, so the rule is enforced here before
+        the grade is persisted in Service B via an A -> B HTTP call.
+        """
+        student = self.repo.get(db, student_id)
+        if student is None:
+            raise StudentNotFoundError(student_id)
+
+        if self.repo.get_enrollment(db, student_id, course_code) is None:
+            raise NotEnrolledError(course_code)
+
+        # --- A -> B HTTP call to persist the grade ---
+        return self.courses_client.record_grade(student_id, course_code, value)
 
     def build_transcript(self, db: Session, student_id: int) -> dict:
         """Build a transcript by fetching each course's grade from Service B."""

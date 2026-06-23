@@ -11,15 +11,22 @@ from app.data.database import get_db
 from app.schemas import (
     EnrollmentCreate,
     EnrollmentOut,
+    GradeCreate,
+    GradeOut,
     StudentCreate,
     StudentOut,
     StudentUpdate,
     TranscriptOut,
 )
-from app.services.courses_client import CoursesServiceUnavailableError
+from app.services.courses_client import (
+    CourseNotFoundError,
+    CoursesServiceUnavailableError,
+    GradeRejectedError,
+)
 from app.services.student_service import (
     AlreadyEnrolledError,
     CourseValidationError,
+    NotEnrolledError,
     StudentAlreadyExistsError,
     StudentNotFoundError,
     StudentService,
@@ -136,6 +143,46 @@ def enroll_student(
             status_code=503, detail="courses service unavailable"
         ) from exc
     return EnrollmentOut.model_validate(enrollment)
+
+
+@router.post(
+    "/{student_id}/grades",
+    response_model=GradeOut,
+    status_code=status.HTTP_201_CREATED,
+)
+def record_grade(
+    student_id: int,
+    payload: GradeCreate,
+    db: Session = Depends(get_db),
+    service: StudentService = Depends(get_service),
+) -> GradeOut:
+    """Record a grade for a student — rejected unless they are enrolled.
+
+    Enforces the enrollment rule locally, then persists the grade in Service B
+    over HTTP.
+    """
+    try:
+        grade = service.record_grade(
+            db, student_id, payload.course_code, payload.value
+        )
+    except StudentNotFoundError as exc:
+        raise HTTPException(status_code=404, detail="student not found") from exc
+    except NotEnrolledError as exc:
+        raise HTTPException(
+            status_code=409,
+            detail=f"student is not enrolled in {exc}",
+        ) from exc
+    except CourseNotFoundError as exc:
+        raise HTTPException(
+            status_code=422, detail=f"unknown course code: {exc}"
+        ) from exc
+    except GradeRejectedError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except CoursesServiceUnavailableError as exc:
+        raise HTTPException(
+            status_code=503, detail="courses service unavailable"
+        ) from exc
+    return GradeOut.model_validate(grade)
 
 
 @router.get("/{student_id}/transcript", response_model=TranscriptOut)

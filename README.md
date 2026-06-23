@@ -67,6 +67,12 @@ information it makes an **HTTP request to Service B** through
    `GET {COURSES_SERVICE_URL}/grades/{student_id}/{course_code}` to fetch the
    grade, then aggregates the GPA.
 
+3. **Record grade** — `POST /students/{id}/grades`
+   `StudentService.record_grade()` first checks **locally** that the student is
+   enrolled in the course, then calls `POST {COURSES_SERVICE_URL}/grades` to
+   persist it. Grading a student who is not enrolled is rejected with `409`
+   and never reaches Service B.
+
 `COURSES_SERVICE_URL` comes from config (`app/config.py`); docker-compose sets
 it to `http://courses:8002`. Locally it defaults to `http://localhost:8002`.
 
@@ -194,6 +200,7 @@ ruff → mypy (non-blocking) → pytest `--cov` for each service → upload cove
 - `PUT    /students/{id}` — update
 - `DELETE /students/{id}` — delete
 - `POST   /students/{id}/enroll` — enroll (validates course via Service B)
+- `POST   /students/{id}/grades` — record a grade (rejected unless enrolled; persisted via Service B)
 - `GET    /students/{id}/transcript` — transcript (grades from Service B)
 - `GET    /health`
 

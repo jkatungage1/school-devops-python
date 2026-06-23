@@ -49,6 +49,21 @@ class EnrollmentOut(BaseModel):
     enrolled_at: datetime
 
 
+class GradeCreate(BaseModel):
+    """Payload to record a grade for an enrolled student."""
+
+    course_code: str
+    value: float
+
+
+class GradeOut(BaseModel):
+    """Grade as returned after being persisted in Service B."""
+
+    student_id: int
+    course_code: str
+    value: float
+
+
 class TranscriptLine(BaseModel):
     """One line of a transcript: a course and the grade obtained for it."""
 

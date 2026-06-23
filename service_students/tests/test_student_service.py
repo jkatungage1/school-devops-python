@@ -13,6 +13,7 @@ from app.services.courses_client import CoursesClient
 from app.services.student_service import (
     AlreadyEnrolledError,
     CourseValidationError,
+    NotEnrolledError,
     StudentAlreadyExistsError,
     StudentNotFoundError,
     StudentService,
@@ -89,6 +90,48 @@ def test_enroll_student_duplicate_raises(
     service.enroll_student(db_session, student.id, "CS101")
     with pytest.raises(AlreadyEnrolledError):
         service.enroll_student(db_session, student.id, "CS101")
+
+
+@respx.mock
+def test_record_grade_requires_enrollment(
+    service: StudentService, db_session: Session
+) -> None:
+    """Grading a student who is not enrolled must fail and never call Service B."""
+    student = service.create_student(db_session, "No", "Enroll", "no@x.com")
+
+    route = respx.post(f"{COURSES_URL}/grades").mock(
+        return_value=httpx.Response(201, json={})
+    )
+
+    with pytest.raises(NotEnrolledError):
+        service.record_grade(db_session, student.id, "CS101", 15.0)
+
+    assert not route.called  # Service B must NOT be hit when not enrolled
+
+
+@respx.mock
+def test_record_grade_persists_via_service_b_when_enrolled(
+    service: StudentService, db_session: Session
+) -> None:
+    student = service.create_student(db_session, "Yes", "Enroll", "yes@x.com")
+
+    respx.get(f"{COURSES_URL}/courses/CS101").mock(
+        return_value=httpx.Response(200, json={"code": "CS101", "title": "CS"})
+    )
+    service.enroll_student(db_session, student.id, "CS101")
+
+    # --- respx mocks Service B accepting the grade ---
+    route = respx.post(f"{COURSES_URL}/grades").mock(
+        return_value=httpx.Response(
+            201,
+            json={"student_id": student.id, "course_code": "CS101", "value": 15.0},
+        )
+    )
+
+    grade = service.record_grade(db_session, student.id, "CS101", 15.0)
+
+    assert route.called  # proves the A -> B HTTP call happened
+    assert grade["value"] == 15.0
 
 
 @respx.mock

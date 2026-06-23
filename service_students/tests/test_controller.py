@@ -92,6 +92,53 @@ def test_enroll_endpoint_unknown_course_422(client: TestClient) -> None:
 
 
 @respx.mock
+def test_grade_endpoint_rejects_unenrolled_student(client: TestClient) -> None:
+    """POST /students/{id}/grades must 409 when the student is not enrolled."""
+    student = client.post(
+        "/students",
+        json={"first_name": "No", "last_name": "Grade", "email": "ng@x.com"},
+    ).json()
+
+    route = respx.post(f"{COURSES_URL}/grades").mock(
+        return_value=httpx.Response(201, json={})
+    )
+
+    resp = client.post(
+        f"/students/{student['id']}/grades",
+        json={"course_code": "CS101", "value": 15.0},
+    )
+    assert resp.status_code == 409
+    assert not route.called  # Service B must not be called for an unenrolled student
+
+
+@respx.mock
+def test_grade_endpoint_records_when_enrolled(client: TestClient) -> None:
+    student = client.post(
+        "/students",
+        json={"first_name": "Ok", "last_name": "Grade", "email": "ok@x.com"},
+    ).json()
+    sid = student["id"]
+
+    respx.get(f"{COURSES_URL}/courses/CS101").mock(
+        return_value=httpx.Response(200, json={"code": "CS101", "title": "CS"})
+    )
+    client.post(f"/students/{sid}/enroll", json={"course_code": "CS101"})
+
+    route = respx.post(f"{COURSES_URL}/grades").mock(
+        return_value=httpx.Response(
+            201, json={"student_id": sid, "course_code": "CS101", "value": 17.0}
+        )
+    )
+
+    resp = client.post(
+        f"/students/{sid}/grades", json={"course_code": "CS101", "value": 17.0}
+    )
+    assert resp.status_code == 201
+    assert route.called
+    assert resp.json()["value"] == 17.0
+
+
+@respx.mock
 def test_transcript_endpoint_mocks_service_b(client: TestClient) -> None:
     student = client.post(
         "/students",

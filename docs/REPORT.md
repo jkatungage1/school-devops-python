@@ -54,8 +54,11 @@ HTTP:
 
 - `GET /courses/{code}` — validate that a course exists before enrollment.
 - `GET /grades/{student_id}/{course_code}` — fetch a grade for the transcript.
+- `POST /grades` — persist a grade, but only after A has checked locally that
+  the student is enrolled in that course (a grade can never be recorded for a
+  student who was not enrolled).
 
-This outbound HTTP call is the seam that is **mocked** in A's unit tests
+These outbound HTTP calls are the seam that is **mocked** in A's unit tests
 (see §4).
 
 ---
@@ -72,6 +75,7 @@ This outbound HTTP call is the seam that is **mocked** in A's unit tests
 | PUT | `/students/{id}` | update a student |
 | DELETE | `/students/{id}` | delete a student |
 | POST | `/students/{id}/enroll` | enroll (validates course via Service B) |
+| POST | `/students/{id}/grades` | record a grade (rejected unless enrolled; persisted via Service B) |
 | GET | `/students/{id}/transcript` | transcript (pulls grades via Service B) |
 
 **Service B — Courses & Grades (`:8002`)**
